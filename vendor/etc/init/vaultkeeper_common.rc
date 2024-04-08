@@ -1,0 +1,16 @@
+# VaultKeeper
+service vaultkeeper /vendor/bin/sleep 999d
+    class core
+    user system
+    group system
+    disabled
+
+service vaultkeeper_hal /vendor/bin/sleep 999d
+    class early_hal
+    user system
+    group system
+    disabled
+
+on late-fs
+    # vaultkeeper
+    mkdir /dev/socket/vaultkeeper 0770 system system

@@ -133,10 +133,15 @@ on_install() {
   # The following is the default implementation: extract $ZIPFILE/system to $MODPATH
   # Extend/change the logic to whatever you want
   ui_print "- Extracting module files"
-  unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
+  mask_lib()
 
-  warn_if_superfluous
-  mask_lib
+  ui_print "$ZIPFILE"
+  ui_print "$MODPATH"
+
+  unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
+  unzip -o "$ZIPFILE" 'vendor/*' -d $MODPATH >&2
+
+  set_permissions
 }
 
 # Only some special files require specific permissions
@@ -154,58 +159,10 @@ set_permissions() {
   # set_perm  $MODPATH/system/lib/libart.so       0     0       0644
 }
 
-# You can add more functions to assist your custom script code
-
-warn_if_superfluous() {
-
-  bl=$(getprop ro.boot.bootloader)
-
-  # Device is either 4 or 5 characters long, depending on length of
-  # bootloader string.
-  #
-  device=${bl:0:$((${#bl} - 8))}
-
-  if ( [ $device = G975F ] || [ $device = G973F ] || [ $device = G970F ]); then
-    ui_print "- Warning: This module is not needed on the $device."
-    ui_print ''
-  fi
-}
-
-rm_from_manifest() {
-  local service=$1
-  local md5
-  local i
-
-  local path_extra='\.hardware'
-
-  for i in /system/vendor/etc/vintf/manifest.xml \
-	   /system/etc/vintf/compatibility_matrix.device.xml \
-	   /system/vendor/etc/vintf/manifest/vaultkeeper_manifest.xml; do
-    if [ -f $i ]; then
-      ui_print " -   Found $i."
-      local combined="${MODPATH}${i}"
-      cp $i $combined
-      sed -i -e '/<hal format="hidl">/{N;/<name>vendor\.samsung'"$path_extra"'\.security\.'"$service"'<\/name>/{:loop;N;/<\/hal>/!bloop;d}}' $combined
-    fi
-  done
-}
-
 mask_lib() {
-  mkdir -p $MODPATH/system/vendor/etc/init/ 2>/dev/null
   mkdir -p $MODPATH/system/etc/vintf/ 2>/dev/null
-  mkdir -p $MODPATH/system/vendor/etc/vintf/manifest/ 2>/dev/null
-  mkdir -p $MODPATH/system/vendor/bin/ 2>/dev/null
+  mkdir -p $MODPATH/vendor/etc/vintf/manifest/ 2>/dev/null
+  mkdir -p $MODPATH/vendor/etc/init/ 2>/dev/null
+  mkdir -p $MODPATH/vendor/bin/ 2>/dev/null
 
-  touch $MODPATH/system/vendor/etc/init/cass.rc
-  touch $MODPATH/system/vendor/etc/init/vaultkeeper_common.rc
-
-  rm_from_manifest vaultkeeper
-
-  echo "#!/bin/sh" > $MODPATH/system/vendor/bin/vaultkeeperd
-  echo "sleep 999d" >> $MODPATH/system/vendor/bin/vaultkeeperd
-  chmod 0755 $MODPATH/system/vendor/bin/vaultkeeperd
-
-  echo "#!/bin/sh" > $MODPATH/system/vendor/bin/cass
-  echo "sleep 999d" >> $MODPATH/system/vendor/bin/cass
-  chmod 0755 $MODPATH/system/vendor/bin/cass
 }

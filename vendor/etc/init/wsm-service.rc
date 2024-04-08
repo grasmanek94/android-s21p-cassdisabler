@@ -1,0 +1,6 @@
+service sec_wsm_service /vendor/bin/sleep 999d
+    oneshot
+    disabled
+    class early_hal
+    user system
+    group system
