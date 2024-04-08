@@ -202,10 +202,10 @@ mask_lib() {
   rm_from_manifest vaultkeeper
 
   echo "#!/bin/sh" > $MODPATH/system/vendor/bin/vaultkeeperd
-  echo "sleep 999d" > $MODPATH/system/vendor/bin/vaultkeeperd
+  echo "sleep 999d" >> $MODPATH/system/vendor/bin/vaultkeeperd
   chmod 0755 $MODPATH/system/vendor/bin/vaultkeeperd
 
   echo "#!/bin/sh" > $MODPATH/system/vendor/bin/cass
-  echo "sleep 999d" > $MODPATH/system/vendor/bin/cass
+  echo "sleep 999d" >> $MODPATH/system/vendor/bin/cass
   chmod 0755 $MODPATH/system/vendor/bin/cass
 }
