@@ -139,7 +139,6 @@ on_install() {
   ui_print "$MODPATH"
 
   unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
-  unzip -o "$ZIPFILE" 'vendor/*' -d $MODPATH >&2
 
   set_permissions
 }
